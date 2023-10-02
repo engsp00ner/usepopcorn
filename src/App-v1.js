@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -116,7 +116,7 @@ function ListBox({ children }) {
   return (
     <div className="box">
       <Button></Button>
-      {isOpen1 && children}
+      {isOpen1 && children }
     </div>
   );
 }
@@ -207,52 +207,8 @@ function WatchedBox() {
 function Main({ children }) {
   return <main className="main">{children}</main>;
 }
-
-function Loader() {
-  return (
-    <div>
-      <p className="loader">Loading....</p>
-    </div>
-  );
-}
-function ErrorMesssage({ message }) {
-  return (
-    <p className="error">
-      <span>🧿 </span>
-      {message}
-    </p>
-  );
-}
-const key = "a38520de";
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [Query, SetQuery] = useState("trersg");
-  const [IsLoading, SetIsLoading] = useState(false);
-  const [errorMesssage, setErrorMesssage] = useState("");
-
-  useEffect(function () {
-    async function FetchMovies() {
-      try {
-        SetIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${key}&s=${Query}`
-        );
-        if (!res.ok)
-          throw new Error("Something went Wrong With Fetching Movies");
-        console.log(`Key :${key} , Query: ${Query}`);
-        const data = await res.json();
-        if (data.Response === "False") throw new Error("Movie not found");
-        setMovies(data.Search);
-        console.log(data.Search);
-      } catch (err) {
-        console.error(err);
-        setErrorMesssage(err.message);
-      } finally {
-        SetIsLoading(false);
-      }
-    }
-    FetchMovies();
-  }, []);
+  const [movies, setMovies] = useState(tempMovieData);
 
   return (
     <>
@@ -261,13 +217,8 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <ListBox>
-          {/* if the system is still loading a loading message will be displayed  */}
-          {IsLoading && <Loader />}{" "}
-          {/* if the loading is false and there is no error message then the process is completed succesfully  */}
-          {!IsLoading && !errorMesssage && <MoviesList movies={movies} />}
-          {/* if the system throw an error the the error message will be displayed  */}
-          {errorMesssage && <ErrorMesssage message={errorMesssage} />}
+        <ListBox  >
+        <MoviesList movies={movies}/>
         </ListBox>
 
         <WatchedBox />
