@@ -82,9 +82,9 @@ function NavBar({ children }) {
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, OnSelectMovie }) {
   return (
-    <li>
+    <li onClick={() => OnSelectMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -96,11 +96,11 @@ function Movie({ movie }) {
     </li>
   );
 }
-function MoviesList({ movies }) {
+function MoviesList({ movies, OnSelectMovie }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie movie={movie} key={movie.imdbID} OnSelectMovie={OnSelectMovie} />
       ))}
     </ul>
   );
@@ -118,7 +118,16 @@ function ListBox({ children }) {
     </div>
   );
 }
-
+function MovieDetail({ selectedId, OnCloseMovie }) {
+  return (
+    <div className="details">
+      <button className="btn-black" onClick={OnCloseMovie}>
+        &larr;
+      </button>
+      <p>{selectedId}</p>
+    </div>
+  );
+}
 function WatchedMovie({ movie }) {
   return (
     <li>
@@ -180,9 +189,8 @@ function WatcheMovieList({ Watched }) {
     </ul>
   );
 }
-function WatchedBox() {
+function WatchedBox({ children }) {
   const [isOpen2, setIsOpen2] = useState(true);
-  const [Watched, setWatched] = useState(tempWatchedData);
 
   return (
     <div className="box">
@@ -192,13 +200,7 @@ function WatchedBox() {
       >
         {isOpen2 ? "–" : "+"}
       </button>
-      {isOpen2 && (
-        <>
-          <WatchedSummary Watched={Watched} />
-
-          <WatcheMovieList Watched={Watched} />
-        </>
-      )}
+      {isOpen2 && children}
     </div>
   );
 }
@@ -218,17 +220,27 @@ function ErrorMesssage({ message }) {
     <p className="error">
       <span>🧿 </span>
       {message}
-      {console.log({ message })}
+      {/* {console.log({ message })} */}
     </p>
   );
 }
 const key = "a38520de";
 export default function App() {
   const [movies, setMovies] = useState([]);
+  const [Watched, setWatched] = useState(tempWatchedData);
+
   const [Query, SetQuery] = useState("heat");
   const [IsLoading, SetIsLoading] = useState(false);
   const [errorMesssage, setErrorMesssage] = useState("");
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState("tt0113277");
+
+  function HandelSelectMovie(ID) {
+    setSelectedId((selectedId) => (ID === selectedId ? null : ID));
+  }
+  function HandleCloseMovie() {
+    setSelectedId(null);
+    console.log(`selected movie id is : ${selectedId ? selectedId : "NA"}`);
+  }
   // useEffect(function () {
   //   console.log("After Initial render");
   // }, []);
@@ -255,16 +267,16 @@ export default function App() {
           const res = await fetch(
             `http://www.omdbapi.com/?apikey=${key}&s=${Query}`
           );
-          console.log(Query ? Query : "No Query Found");
+          // console.log(Query ? Query : "No Query Found");
           if (!res.ok)
             throw new Error("Something went Wrong With Fetching Movies");
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not found");
           setMovies(data.Search);
-          console.log(data.Search); 
+          // console.log(data.Search);
         } catch (err) {
           setErrorMesssage(err.message);
-          console.log(err.message);
+          // console.log(err.message);
         } finally {
           SetIsLoading(false);
         }
@@ -288,14 +300,32 @@ export default function App() {
       <Main>
         <ListBox>
           {/* if the system is still loading a loading message will be displayed  */}
-          {IsLoading && <Loader />}{" "}
+          {IsLoading && <Loader />}
           {/* if the loading is false and there is no error message then the process is completed succesfully  */}
-          {!IsLoading && !errorMesssage && <MoviesList movies={movies} />}
+          {!IsLoading && !errorMesssage && (
+            <MoviesList
+              movies={movies}
+              OnSelectMovie={HandelSelectMovie}
+            ></MoviesList>
+          )}
           {/* if the system throw an error the the error message will be displayed  */}
           {errorMesssage && <ErrorMesssage message={errorMesssage} />}
         </ListBox>
 
-        <WatchedBox />
+        <WatchedBox>
+          {selectedId ? (
+            <MovieDetail
+              selectedId={selectedId}
+              OnCloseMovie={HandleCloseMovie}
+            />
+          ) : (
+            <>
+              <WatchedSummary Watched={Watched} />
+
+              <WatcheMovieList Watched={Watched} />
+            </>
+          )}
+        </WatchedBox>
       </Main>
     </>
   );
