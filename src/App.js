@@ -53,15 +53,14 @@ function Logo() {
     </div>
   );
 }
-function Search() {
-  const [query, setQuery] = useState("");
+function Search({ Query, SetQuery }) {
   return (
     <input
       className="search"
       type="text"
       placeholder="Search movies..."
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
+      value={Query}
+      onChange={(e) => SetQuery(e.target.value)}
     />
   );
 }
@@ -106,7 +105,6 @@ function MoviesList({ movies }) {
     </ul>
   );
 }
-function HandleClick() {}
 function Button(HandleClick) {
   return <button className="btn-toggle" onClick={() => HandleClick}></button>;
 }
@@ -220,44 +218,71 @@ function ErrorMesssage({ message }) {
     <p className="error">
       <span>🧿 </span>
       {message}
+      {console.log({ message })}
     </p>
   );
 }
 const key = "a38520de";
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [Query, SetQuery] = useState("trersg");
+  const [Query, SetQuery] = useState("heat");
   const [IsLoading, SetIsLoading] = useState(false);
   const [errorMesssage, setErrorMesssage] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+  // useEffect(function () {
+  //   console.log("After Initial render");
+  // }, []);
 
-  useEffect(function () {
-    async function FetchMovies() {
-      try {
-        SetIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${key}&s=${Query}`
-        );
-        if (!res.ok)
-          throw new Error("Something went Wrong With Fetching Movies");
-        console.log(`Key :${key} , Query: ${Query}`);
-        const data = await res.json();
-        if (data.Response === "False") throw new Error("Movie not found");
-        setMovies(data.Search);
-        console.log(data.Search);
-      } catch (err) {
-        console.error(err);
-        setErrorMesssage(err.message);
-      } finally {
-        SetIsLoading(false);
+  // useEffect(function () {
+  //   console.log("After every render ");
+  // });
+
+  // useEffect(
+  //   function () {
+  //     console.log("D");
+  //   },
+  //   [Query]
+  // );
+
+  // console.log("During render");
+
+  useEffect(
+    function () {
+      async function FetchMovies() {
+        try {
+          SetIsLoading(true);
+          setErrorMesssage("");
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${key}&s=${Query}`
+          );
+          console.log(Query ? Query : "No Query Found");
+          if (!res.ok)
+            throw new Error("Something went Wrong With Fetching Movies");
+          const data = await res.json();
+          if (data.Response === "False") throw new Error("Movie not found");
+          setMovies(data.Search);
+          console.log(data.Search); 
+        } catch (err) {
+          setErrorMesssage(err.message);
+          console.log(err.message);
+        } finally {
+          SetIsLoading(false);
+        }
       }
-    }
-    FetchMovies();
-  }, []);
+      if (Query.length < 3) {
+        setMovies([]);
+        setErrorMesssage("");
+        return;
+      }
+      FetchMovies();
+    },
+    [Query]
+  );
 
   return (
     <>
       <NavBar>
-        <Search />
+        <Search Query={Query} SetQuery={SetQuery} />
         <NumResults movies={movies} />
       </NavBar>
       <Main>
