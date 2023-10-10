@@ -119,14 +119,84 @@ function ListBox({ children }) {
   );
 }
 function MovieDetail({ selectedId, OnCloseMovie }) {
-  return (
-    <div className="details">
-      <button className="btn-black" onClick={OnCloseMovie}>
-        &larr;
-      </button>
-      <p>{selectedId}</p>
-    </div>
+  const [MoveDetail, SetMovieDetail] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Runtime: runtime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actros,
+    Director: director,
+    Genre: genre,
+  } = MoveDetail;
+  console.log(title, year);
+  useEffect(
+    function () {
+      async function GetMovieDetails() {
+        setIsLoading(true);
+        try {
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${key}&i=${selectedId}`
+          );
+          console.log(selectedId ? selectedId : "No selectedId Found");
+          if (!res.ok)
+            throw new Error("Something went Wrong With Fetching Movie details");
+          const data = await res.json();
+          SetMovieDetail(data);
+          if (data.Response === "False")
+            throw new Error("Movie Details not found");
+          // setMovies(data.Search);
+          console.log(data);
+        } catch (err) {
+          // setErrorMesssage(err.message);
+          // console.log(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      GetMovieDetails();
+    },
+    [selectedId]
   );
+  return (
+
+    <div className="details">
+    {isLoading ? <Loader/> :
+    <>
+      <header>
+        <button className="btn-black" onClick={OnCloseMovie}>
+          &larr;
+        </button>
+        <img src={poster} alt={`Poster of ${title} movie`} />
+        <div className="details-overview">
+          <h2>{title}</h2>
+          <p>
+            {released} &bull; {runtime}
+          </p>
+          <p>{genre}</p>
+          <p>
+            <span>⭐</span>
+            {imdbRating} IMDB Rating
+          </p>
+        </div>
+      </header>
+      <section>
+        <p>
+          <em>{plot}</em>
+        </p>
+        <p>Starring: {actros}</p>
+        <p>Directed by: {director}</p>
+      </section>
+      </>}
+    </div>
+  
+  );
+  
 }
 function WatchedMovie({ movie }) {
   return (
@@ -241,22 +311,7 @@ export default function App() {
     setSelectedId(null);
     console.log(`selected movie id is : ${selectedId ? selectedId : "NA"}`);
   }
-  // useEffect(function () {
-  //   console.log("After Initial render");
-  // }, []);
-
-  // useEffect(function () {
-  //   console.log("After every render ");
-  // });
-
-  // useEffect(
-  //   function () {
-  //     console.log("D");
-  //   },
-  //   [Query]
-  // );
-
-  // console.log("During render");
+  
 
   useEffect(
     function () {
