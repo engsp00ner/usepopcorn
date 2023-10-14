@@ -141,6 +141,14 @@ body {
   overflow: scroll;
 }
 
+.AlreadyWatched{
+  font-weight: bold;
+  color: rgba(236, 18, 18, 0.788);
+  text-align: center;
+}
+
+
+
 .list-watched {
   height: calc(100% - 9rem);
 }
