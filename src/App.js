@@ -117,7 +117,25 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
       </p>
     );
   }
+  //listening to the keyboard
+  useEffect(
+    function () {
+      function CallBack(e) {
+        if (e.code === "Escape") {
+          OnCloseMovie();
+          console.log("Closing");
+        }
+      }
+      document.addEventListener("keydown",CallBack);
 
+      //the cleaning function for the event  
+      //listner so the request will not be repeated 
+      return function (){
+        document.removeEventListener('keydown',CallBack);
+      }
+    },
+    [OnCloseMovie]
+  );
   //get the details about the movie
   useEffect(
     function () {
@@ -313,7 +331,7 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [Watched, setWatched] = useState([]);
 
-  const [Query, SetQuery] = useState("heat");
+  const [Query, SetQuery] = useState("");
   const [IsLoading, SetIsLoading] = useState(false);
   const [errorMesssage, setErrorMesssage] = useState("");
   const [selectedId, setSelectedId] = useState("");
@@ -332,7 +350,6 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
-  //getting the movies from the search
   useEffect(
     function () {
       const controller = new AbortController();
@@ -341,7 +358,7 @@ export default function App() {
           SetIsLoading(true);
           const res = await fetch(
             `http://www.omdbapi.com/?apikey=${key}&s=${Query}`,
-           //to abort the us used fetch requests 
+            //to abort the us used fetch requests
             { signal: controller.signal }
           );
           // console.log(Query ? Query : "No Query Found");
@@ -350,12 +367,11 @@ export default function App() {
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movie not found");
           setMovies(data.Search);
-        setErrorMesssage("");
+          setErrorMesssage("");
           // console.log(data.Search);
         } catch (err) {
-          if(err.name !="AbortError")
-          setErrorMesssage(err.message);
-          // console.log(err.message);
+          if (err.name !== "AbortError") setErrorMesssage(err.message);
+          console.log(err.message);
         } finally {
           SetIsLoading(false);
         }
@@ -365,12 +381,13 @@ export default function App() {
         setErrorMesssage("");
         return;
       }
+      HandleCloseMovie();
       FetchMovies();
 
-      //clean up function 
-      return function (){
+      //clean up function to prevent multi requests 
+      return function () {
         controller.abort();
-      }
+      };
     },
     [Query]
   );
