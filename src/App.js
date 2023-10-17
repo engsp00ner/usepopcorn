@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -15,11 +15,36 @@ function Search({ Query, SetQuery }) {
   //we will select the search input field
   // to start the focus on it useing effects
 
-  useEffect(function () {
-    const el = document.querySelector(".search");
-    // console.log(el);
-    el.focus();
-  }, []);
+  // useEffect(function () {
+  //   const el = document.querySelector(".search");
+  //   // console.log(el);
+  //   el.focus();
+  // }, []);
+
+  //we will use ref to select the element
+
+  //1.we create the ref with initial state of null as
+  // we need to set it to a HTML element
+  const InputEl = useRef(null);
+
+  //3. as we hade the element using the ref Step2
+  // then we can useeffect and get the element by using
+  //the InputEl.currentin in order to set the required action
+  useEffect(
+    function () {
+      function callback(e) {
+        if (document.activeElement === InputEl) return;
+        if (e.code === "Enter") {
+          InputEl.current.focus();
+          SetQuery("");
+        }
+      }
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },
+    [SetQuery]
+  );
+
   return (
     <input
       className="search"
@@ -27,6 +52,8 @@ function Search({ Query, SetQuery }) {
       placeholder="Search movies..."
       value={Query}
       onChange={(e) => SetQuery(e.target.value)}
+      //2. the value will be updated inside the element
+      ref={InputEl}
     />
   );
 }
