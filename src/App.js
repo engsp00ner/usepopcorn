@@ -81,10 +81,7 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
   const [isLoading, setIsLoading] = useState(false);
   const [UserRating, SetUserRating] = useState(5);
   const IsWatched = Watched.map((movie) => movie.imdbID).includes(selectedId);
- // console.log(IsWatched);
-
- 
-
+  // console.log(IsWatched);
 
   const {
     Title: title,
@@ -101,11 +98,16 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
   console.log(title, year);
   /*we canot create any states based on if condition,
    as it will prevent other states from creating */
- /*eslint-disable */
-//  if(imdbRating >8) { [IsTop , SetIsTop]=useState(true); console.log(`IsTop:${IsTop}`)}
+  /*eslint-disable */
+  //  if(imdbRating >8) { [IsTop , SetIsTop]=useState(true); console.log(`IsTop:${IsTop}`)}
 
-// this also is wrong  as it will not create the remaning states 
-// if(imdbRating>8) return<p>Thegreatest ever</p>
+  // this also is wrong  as it will not create the remaning states
+  // if(imdbRating>8) return<p>Thegreatest ever</p>
+
+  // this is how to make the required task
+  const IsTop = imdbRating > 8;
+
+  const [AvgRating, SetAvgRating] = useState(0);
   function HandleAdd() {
     const NewWatchedMovie = {
       imdbID: selectedId,
@@ -118,7 +120,14 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
     };
 
     OnAddWatched(NewWatchedMovie);
-    OnCloseMovie();
+    // OnCloseMovie();
+
+    // SetAvgRating((Number(AvgRating) + UserRating) / 2);
+
+    // we can access current value using a function 
+    SetAvgRating(Number(imdbRating));
+    SetAvgRating(AvgRating =>(AvgRating + UserRating) / 2);
+    alert(AvgRating);
   }
   function AlreadyWatched() {
     return (
@@ -136,13 +145,13 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
           console.log("Closing");
         }
       }
-      document.addEventListener("keydown",CallBack);
+      document.addEventListener("keydown", CallBack);
 
-      //the cleaning function for the event  
-      //listner so the request will not be repeated 
-      return function (){
-        document.removeEventListener('keydown',CallBack);
-      }
+      //the cleaning function for the event
+      //listner so the request will not be repeated
+      return function () {
+        document.removeEventListener("keydown", CallBack);
+      };
     },
     [OnCloseMovie]
   );
@@ -217,6 +226,7 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
               )}
             </div>
           </header>
+          <p>Average Rating is :{AvgRating}</p>
           <section>
             <p>
               <em>{plot}</em>
@@ -395,7 +405,7 @@ export default function App() {
       HandleCloseMovie();
       FetchMovies();
 
-      //clean up function to prevent multi requests 
+      //clean up function to prevent multi requests
       return function () {
         controller.abort();
       };
