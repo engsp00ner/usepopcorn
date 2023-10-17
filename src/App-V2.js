@@ -81,11 +81,7 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
   const [isLoading, setIsLoading] = useState(false);
   const [UserRating, SetUserRating] = useState(5);
   const IsWatched = Watched.map((movie) => movie.imdbID).includes(selectedId);
- // console.log(IsWatched);
-
- 
-
-
+  console.log(IsWatched);
   const {
     Title: title,
     Year: year,
@@ -99,13 +95,7 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
     Genre: genre,
   } = MoveDetail;
   console.log(title, year);
-  /*we canot create any states based on if condition,
-   as it will prevent other states from creating */
- /*eslint-disable */
-//  if(imdbRating >8) { [IsTop , SetIsTop]=useState(true); console.log(`IsTop:${IsTop}`)}
 
-// this also is wrong  as it will not create the remaning states 
-// if(imdbRating>8) return<p>Thegreatest ever</p>
   function HandleAdd() {
     const NewWatchedMovie = {
       imdbID: selectedId,
