@@ -124,10 +124,11 @@ function MovieDetail({ selectedId, OnCloseMovie, OnAddWatched, Watched }) {
 
     // SetAvgRating((Number(AvgRating) + UserRating) / 2);
 
-    // we can access current value using a function 
+    // we can access current value using a function
     SetAvgRating(Number(imdbRating));
-    SetAvgRating(AvgRating =>(AvgRating + UserRating) / 2);
-    alert(AvgRating);
+    SetAvgRating((AvgRating) => (AvgRating + UserRating) / 2);
+    // alert(AvgRating);
+    OnCloseMovie();
   }
   function AlreadyWatched() {
     return (
@@ -349,12 +350,21 @@ function ErrorMesssage({ message }) {
 const key = "a38520de";
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [Watched, setWatched] = useState([]);
-
   const [Query, SetQuery] = useState("");
   const [IsLoading, SetIsLoading] = useState(false);
   const [errorMesssage, setErrorMesssage] = useState("");
   const [selectedId, setSelectedId] = useState("");
+
+
+  // const [Watched, setWatched] = useState([]);\
+
+  //in the state we can just use 
+  //a call pack function so the initial value of the state
+  // will be what ever the call back function return 
+  const [Watched, setWatched] = useState(function(){
+    const StoredValue = localStorage.getItem('Watched');
+    return JSON.parse(StoredValue);
+  });
 
   function HandelSelectMovie(ID) {
     setSelectedId((selectedId) => (ID === selectedId ? null : ID));
@@ -370,6 +380,31 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
+ //we can add to the local storage using the following
+    //localstorage.setItem("the key value " , the actuall stored data )
+    //as watched is not updated here yet,
+    // so we will add the new value of the watched list
+    //1.localStorage.setItem('watched',Watched);
+
+    //the adding fun will be in the following form
+    //2.localStorage.setItem("watched",[...watched,movie]);
+
+    //we still having small problem here as the local storage only saves text,
+    //so we need to transfer the watched array to string by using json.stringify() fun
+
+    //3. localStorage.setItem('Watched', JSON.stringify([...Watched , movie]))
+  //we need to use local storage in seprate effect,
+  // so we would be able to reuse that data in the local
+
+
+  
+
+  useEffect(function () {
+    //we didn`t need the array as the effect
+    // will be applied only if the watched list is update 
+    
+        localStorage.setItem("Watched", JSON.stringify(Watched));
+      }, [Watched]);
   useEffect(
     function () {
       //create new controller in order to handle Un Used Requests
